@@ -3,7 +3,6 @@ import ReduxProvider from "./components/provider/ReduxProvider";
 import Match from "./page/Match";
 import Home from "./page/Home";
 import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
 import LoginEnable from "./components/loginEnable";
 import Chat from "./page/Chat";
 import Quiz from "./page/quiz";
@@ -13,7 +12,6 @@ const App = () => {
   return (
     <ReduxProvider>
       
-      <Navbar />
       <LoginEnable />
       <Routes> 
         <Route path="/" element={<Home />} />

@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { findMatch } from "../services/authService";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { useEffect, useRef, useState } from "react";
 
 const Match = () => {
   const user = useSelector((state) => state.nav.user);
@@ -95,10 +96,10 @@ const Match = () => {
         {!connectionId ? (
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Welcome to Omegle Clone
+              Welcome to Bloom
             </h2>
             <p className="text-gray-600">
-              Click "NEW" to find a new person to chat with.
+              Click "NEW" to find a new person to talk to.
             </p>
           </div>
         ) : (
@@ -107,7 +108,7 @@ const Match = () => {
               {!connectionId ? (
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    Welcome to Omegle Clone
+                    Welcome to Bloom
                   </h2>
                   <p className="text-gray-600">
                     Click "NEW" to find a new person to chat with.
@@ -139,7 +140,7 @@ const Match = () => {
           {!connectionId ? (
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Welcome to Omegle Clone
+                Welcome to Bloom
               </h2>
               <p className="text-gray-600">
                 Click "NEW" to find a new person to chat with.
@@ -164,8 +165,8 @@ const Match = () => {
         </div>
 
         <div className="flex gap-3 justify-between">
-          <button className="w-[50%] h-full mx-auto px-5 py-4 bg-gradient-to-b from-orange-300 bg-orange-400 text-white rounded-md text-md border-orange-400 border text-center hidden md:block opacity-50 cursor-not-allowed">
-            GUYS & GIRLS
+          <button className="w-[50%] h-full mx-auto px-5 py-4 bg-gradient-to-b from-green-600 bg-green-600 text-white rounded-md text-md border-green-600 border text-center hidden md:block opacity-50 cursor-not-allowed">
+            Talk to Bloom AI
           </button>
           <button
             onClick={() => {
