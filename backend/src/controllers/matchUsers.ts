@@ -44,25 +44,12 @@ export const findMatch = async (req: Request, res: Response) => {
             return res.status(404).json({ success: false, message: "No online users available for matching", data: null })
         }
 
-        const userEmotionalScore = userData.emotionalScore;
-        if (userEmotionalScore) {
-            const availableUsers: Partial<IUser>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<IUser>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
-            if (availableUsers.length === 0) {
-                return res.status(404).json({ success: false, message: "No available users for matching", data: null });
-            }
+        const availableUsers: Partial<IUser>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<IUser>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
+        if (availableUsers.length === 0) {
+            return res.status(404).json({ success: false, message: "No available users for matching", data: null });
+        }
 
-            const upperLimit = userEmotionalScore + 5;
-            const lowerLimit = userEmotionalScore - 5;
-
-            const usersWithinEmotionalRange = availableUsers.filter((user) => {
-                return (
-                    typeof user.emotionalScore === "number" &&
-                    user.emotionalScore > lowerLimit &&
-                    user.emotionalScore < upperLimit
-                );
-            })
-
-            const randomUser = availableUsers[Math.floor(Math.random() * usersWithinEmotionalRange.length)];
+            const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
 
             const connectionRef = await db.collection("connections").add({
                 users: [uid, randomUser.id],
@@ -97,7 +84,6 @@ export const findMatch = async (req: Request, res: Response) => {
                 connectionId
             }
         })
-        }
 
     } catch (error: any) {
         return res.status(500).json({ success: false, message: error.message });
