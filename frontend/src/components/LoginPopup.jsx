@@ -4,6 +4,8 @@ import { FaFacebook } from "react-icons/fa";
 import { signInWithGoogle } from "../services/authService";
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { createProfile } from "../services/authService";
+import { setUser, toggleLoginScreen } from "../redux/slices/navSlice";
 
 const LoginPopup = () => {
 
@@ -24,7 +26,7 @@ const LoginPopup = () => {
         if (success) {
             dispatch(setUser(myUser));
             dispatch(toggleLoginScreen());
-            router("/info");
+            router("/quiz");
         }
 
         alert(message);

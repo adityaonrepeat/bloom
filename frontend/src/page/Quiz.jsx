@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { questions } from "../data/questions"
+import { questions } from "../data/Question"
 import ProgressBar from "../components/ProgressBar"
 import QuestionCard from "../components/QuestionCard"
 
