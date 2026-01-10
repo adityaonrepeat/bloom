@@ -1,33 +1,38 @@
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { getEmotionLevel } from "../utils/emotion"
+import { useEffect } from "react"
+import { useSelector } from "react-redux";
 
 export default function Result() {
   const navigate = useNavigate()
   const score = Number(localStorage.getItem("emotion-score"))
   const level = getEmotionLevel(score)
+  const user = useSelector((state) => state.nav.user);
 
 
-  const saveScore = async () => {
-    try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/user/set-score`,
-        {
-          score: score,
-        },
-        {
-          level: level,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-    } catch (error) {
-      console.error("Error saving emotion score:", error)
+  console.log(score);
+  console.log(user.uid);
+  console.log(level);
+
+  useEffect(() => {
+    const saveScore = async () => {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/user/set-score`,
+          {
+            uid: user.uid,
+            emotionalScore: score,
+            emotionalTag: level
+          }
+        )
+      } catch (error) {
+        console.error("Error saving emotion score:", error)
+      }
     }
-  }
-
+    
+    saveScore();
+  }, [score, level, user.uid])
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 px-4 pb-24">
       <div className="bg-white p-8 rounded-xl shadow-lg text-center space-y-6 w-full max-w-md">
