@@ -1,10 +1,10 @@
-export interface IResponse {
+export interface ServerResponse {
     success: boolean;
     message: string;
     data: any
 }
 
-export interface IUser {
+export interface User {
     id: string;
     displayName: string;
     email: string,
@@ -14,5 +14,6 @@ export interface IUser {
     connectedEmails: string[],
     connectedWith: string | null,
     connectionId: string | null,
-    emotionalScore: number
+    emotionalScore: number,
+    emotionalLevel: "Calm" | "Balanced" | "Stressed"
 }

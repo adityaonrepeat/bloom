@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { db } from "../config/firebase.config";
 
 export const setEmotionalScore = async (req: Request, res: Response) => {
-    const { uid, userScore }: { uid: string; userScore: number } = req.body;
+    const { uid, userScore, emotionalTag }: { uid: string; userScore: number, emotionalTag: string } = req.body;
 
-    if (!uid || !userScore) {
+    if (!uid || !userScore || !emotionalTag) {
         return res.status(400).json({ success: false, message: "Required uid and emotional score" });
     }
 
@@ -15,7 +15,8 @@ export const setEmotionalScore = async (req: Request, res: Response) => {
         }
 
         await userSnap.update({
-            emotionalScore: userScore
+            emotionalScore: userScore,
+            emotionalLevel: emotionalTag
         });
 
         return res.status(200).json({ success: true, message: "Score set successfully" });

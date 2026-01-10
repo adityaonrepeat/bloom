@@ -1,4 +1,4 @@
-import { IUser } from "../types/server";
+import { User } from "../types/server";
 import type { Request, Response } from "express";
 import { db } from "../config/firebase.config";
 
@@ -18,7 +18,7 @@ export const findMatch = async (req: Request, res: Response) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        const userData: Partial<IUser> = {
+        const userData: Partial<User> = {
             id: uid,
             ...userSnap.data()
         }
@@ -46,7 +46,7 @@ export const findMatch = async (req: Request, res: Response) => {
 
         const userEmotionalScore = userData.emotionalScore;
         if (userEmotionalScore) {
-            const availableUsers: Partial<IUser>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<IUser>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
+            const availableUsers: Partial<User>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<User>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
             if (availableUsers.length === 0) {
                 return res.status(404).json({ success: false, message: "No available users for matching", data: null });
             }

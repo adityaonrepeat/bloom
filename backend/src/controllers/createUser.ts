@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { db } from "../config/firebase.config";
-import { IResponse } from "../types/server";
+import { ServerResponse } from "../types/server";
 
 export const createUser = async (req: Request, res: Response) => {
     const { displayName, email, uid } = req.body;
@@ -16,7 +16,7 @@ export const createUser = async (req: Request, res: Response) => {
 
         const docSnap = await userRef.get();
 
-        let response: IResponse = {
+        let response: ServerResponse = {
             success: true,
             message: "",
             data: null
@@ -39,7 +39,6 @@ export const createUser = async (req: Request, res: Response) => {
                 lastLogin: new Date(),
                 connectedWith: null,
                 connectedEmails: [],
-                connectedId: null,
                 emotionalScore: 0
             })
 
