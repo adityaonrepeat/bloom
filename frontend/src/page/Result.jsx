@@ -1,22 +1,4 @@
-// import { getEmotionLevel } from "../utils/emotion"
-
-// export default function Result() {
-//   const score = Number(localStorage.getItem("emotion-score"))
-//   const level = getEmotionLevel(score)
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-slate-50">
-//       <div className="bg-white p-8 rounded-xl shadow-lg text-center space-y-4">
-//         <h1 className="text-2xl font-bold">Your Result</h1>
-//         <p className="text-lg">Score: {score}</p>
-//         <p className="text-xl font-semibold text-emerald-600">
-//           {level}
-//         </p>
-//       </div>
-//     </div>
-//   )
-// }
-
+import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { getEmotionLevel } from "../utils/emotion"
 
@@ -25,8 +7,29 @@ export default function Result() {
   const score = Number(localStorage.getItem("emotion-score"))
   const level = getEmotionLevel(score)
 
+
+  const saveScore = async () => {
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/user/set-score`,
+        {
+          score: score,
+        },
+        {
+          level: level,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+    } catch (error) {
+      console.error("Error saving emotion score:", error)
+    }
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 px-4 pb-24">
       <div className="bg-white p-8 rounded-xl shadow-lg text-center space-y-6 w-full max-w-md">
         
         <h1 className="text-2xl font-bold">Your Result</h1>
@@ -51,7 +54,7 @@ export default function Result() {
             onClick={() => navigate("/chat")}
             className="w-full h-12 rounded-xl border border-slate-300 text-slate-800 font-medium hover:bg-slate-100 transition"
           >
-            Talk to Bloom AI
+            Talk to Aastha
           </button>
         </div>
 

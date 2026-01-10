@@ -34,7 +34,7 @@ const LoginPopup = () => {
     };
 
   return (
-    <div className="w-screen h-screen absolute top-0 left-0 right-0 bg-black/70 grid place-items-center">
+    <div className="h-screen absolute top-0 left-0 right-0 bg-black/70 grid place-items-center">
       <div className="lg:w-[28vw] bg-white rounded-lg grid place-items-center py-10 px-8">
         
         <div className="text-4xl font-bold text-green-600">Bloom🌱</div>

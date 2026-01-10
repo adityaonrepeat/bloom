@@ -7,11 +7,12 @@ import LoginEnable from "./components/loginEnable";
 import Chat from "./page/Chat";
 import Quiz from "./page/quiz";
 import Result from "./page/Result";
+import Navbar from "./components/Navbar";
 
 const App = () => {
   return (
     <ReduxProvider>
-      
+      <Navbar />
       <LoginEnable />
       <Routes> 
         <Route path="/" element={<Home />} />
@@ -20,7 +21,6 @@ const App = () => {
         <Route path="/chat" element={<Chat />} />
         <Route path="/result" element={<Result />} />
       </Routes>
-      
     </ReduxProvider>
   );
 };

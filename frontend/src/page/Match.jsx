@@ -77,7 +77,7 @@ const Match = () => {
   };
 
   return (
-    <div className="px-3 py-5 flex flex-col sm:flex-row justify-between sm:h-[88vh] gap-3 sm:gap-0">
+    <div className="px-3 py-5 flex flex-col sm:flex-row justify-between sm:h-[88vh] gap-3 sm:gap-0 bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
       <div className="h-full sm:w-[27%] flex flex-col gap-3">
         <div className="w-full bg-slate-800 h-[80vh] sm:h-full rounded-lg overflow-hidden relative border-2 border-slate-700">
           {connectionId ? (
@@ -95,7 +95,7 @@ const Match = () => {
 
         {!connectionId ? (
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2 ">
               Welcome to Bloom
             </h2>
             <p className="text-gray-600">
@@ -103,7 +103,7 @@ const Match = () => {
             </p>
           </div>
         ) : (
-          <div className="w-full h-full flex flex-col">
+          <div className="w-full h-full flex flex-col ">
             <div className="p-3 border-b bg-gray-50 rounded-t-lg border-gray-300 flex flex-col items-center justify-center p-4">
               {!connectionId ? (
                 <div className="text-center">

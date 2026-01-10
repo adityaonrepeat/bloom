@@ -10,10 +10,10 @@ const Navbar = () => {
   const user = useSelector((state) => state.user);
 
   return (
-    <nav className="py-2 px-2 flex gap-4 items-center justify-between bg-gradient-to-r from-emerald-50 via-white to-emerald-20 h-24">
+    <nav className="py-2 px-2 flex gap-4 items-center justify-between bg-gradient-to-bl from-emerald-100 via-white to-emerald-50 h-24">
       {/* Left Logo */}
       <Link to="/" className="flex gap-4 items-center ml-5">
-        <h1 className="text-xl font-bold text-green-600">Bloom 🌱</h1>
+        <h1 className="text-3xl font-bold text-green-600">Bloom 🌱</h1>
       </Link>
 
       {/* Right Buttons */}
@@ -22,7 +22,7 @@ const Navbar = () => {
         <button
           className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
         >
-          PLUS
+          Logout
         </button>
 
         {user ? (
