@@ -22,7 +22,7 @@ export default function Quiz() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-6 space-y-6">
         <ProgressBar current={index + 1} total={questions.length} />
         <QuestionCard
