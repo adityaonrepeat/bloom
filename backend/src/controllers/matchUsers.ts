@@ -44,12 +44,25 @@ export const findMatch = async (req: Request, res: Response) => {
             return res.status(404).json({ success: false, message: "No online users available for matching", data: null })
         }
 
-        const availableUsers: Partial<IUser>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<IUser>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
-        if (availableUsers.length === 0) {
-            return res.status(404).json({ success: false, message: "No available users for matching", data: null });
-        }
+        const userEmotionalScore = userData.emotionalScore;
+        if (userEmotionalScore) {
+            const availableUsers: Partial<IUser>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<IUser>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
+            if (availableUsers.length === 0) {
+                return res.status(404).json({ success: false, message: "No available users for matching", data: null });
+            }
+            
+            const upperLimit = userEmotionalScore + 5;
+            const lowerLimit = userEmotionalScore - 5;
 
-            const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
+            const usersWithinEmotionalRange = availableUsers.filter((user) => {
+                return (
+                    typeof user.emotionalScore === "number" &&
+                    user.emotionalScore > lowerLimit &&
+                    user.emotionalScore < upperLimit
+                );
+            })
+
+            const randomUser = availableUsers[Math.floor(Math.random() * usersWithinEmotionalRange.length)];
 
             const connectionRef = await db.collection("connections").add({
                 users: [uid, randomUser.id],
@@ -62,31 +75,32 @@ export const findMatch = async (req: Request, res: Response) => {
                 db.collection("users").doc(uid).update({
                     connectionId,
                     connectedWith: randomUser.id,
-                    connectedEmails: randomUser.email ? [...userConnectedEmails, String(randomUser.email)]:     userConnectedEmails
+                    connectedEmails: randomUser.email ? [...userConnectedEmails, String(randomUser.email)] : userConnectedEmails
                 }),
                 db.collection("users").doc(randomUser.id as string).update({
                     connectionId,
                     connectedWith: uid,
-                    connectedEmails: userData.email ? [...(Array.isArray(randomUser.connectedEmails)? randomUser.   connectedEmails: []), String(userData.email)]: (Array.isArray(randomUser.connectedEmails)? randomUser. connectedEmails: [])
+                    connectedEmails: userData.email ? [...(Array.isArray(randomUser.connectedEmails) ? randomUser.connectedEmails : []), String(userData.email)] : (Array.isArray(randomUser.connectedEmails) ? randomUser.connectedEmails : [])
                 })
             ])
 
-        await Promise.all([
-            db.collection("onlineUsers").doc(uid).update({ status: "matched" }),
-            db.collection("onlineUsers").doc(randomUser.id as string).update({ status: "matched" })
-        ])
+            await Promise.all([
+                db.collection("onlineUsers").doc(uid).update({ status: "matched" }),
+                db.collection("onlineUsers").doc(randomUser.id as string).update({ status: "matched" })
+            ])
 
-        return res.status(200).json({
-            success: true,
-            message: "Match found",
-            data: {
-                matcheduser: randomUser,
-                connectionId
-            }
-        })
-
+            return res.status(200).json({
+                success: true,
+                message: "Match found",
+                data: {
+                    matcheduser: randomUser,
+                    connectionId
+                }
+            })
+        } else {
+            return res.status(400).json({ success: false, message: "Emotional score required for matching!" });
+        }
     } catch (error: any) {
         return res.status(500).json({ success: false, message: error.message });
     }
-
 }
