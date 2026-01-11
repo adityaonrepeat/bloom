@@ -8,6 +8,7 @@ import Chat from "./page/Chat";
 import Quiz from "./page/quiz";
 import Result from "./page/Result";
 import Navbar from "./components/Navbar";
+import Dashboard from "./page/Dashboard";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
       <LoginEnable />
       <Routes> 
         <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/match" element={<Match />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/chat" element={<Chat />} />

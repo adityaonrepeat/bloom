@@ -1,6 +1,11 @@
-import { Link } from "react-router-dom";
+import { toggleLoginScreen } from "../redux/slices/navSlice";
+import { useDispatch } from "react-redux";
+
 
 export default function Home() {
+
+  const dispatch = useDispatch();
+
   return (
     <div className="h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100 ">
       
@@ -17,18 +22,20 @@ export default function Home() {
         </p>
 
         <div className="mt-10 flex gap-4">
-          <Link
-            to="/signup"
+          <button
+            onClick={() => {
+              dispatch(toggleLoginScreen());
+            }}
             className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
           >
             Get Started
-          </Link>
-          <Link
-            to="/about"
+          </button>
+          <button
+            disabled
             className="px-6 py-3 border border-emerald-600 text-emerald-700 rounded-lg hover:bg-emerald-50 transition"
           >
             Learn More
-          </Link>
+          </button>
         </div>
       </section>
 

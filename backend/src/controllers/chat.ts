@@ -143,13 +143,13 @@ export const startConversation = async (req: Request, res: Response) => {
 //     const { model, generationConfig } = await initializeTherapeuticModel();
     
 //     // Convert history to Gemini format if provided
-//     // let chatHistory = [];
-//     // if (history && Array.isArray(history)) {
-//     //   chatHistory = history.map(msg => ({
-//     //     role: msg.role === 'user' ? 'user' : 'model',
-//     //     parts: [{ text: msg.content }]
-//     //   }));
-//     // }
+//     let chatHistory = [];
+//     if (history && Array.isArray(history)) {
+//       chatHistory = history.map(msg => ({
+//         role: msg.role === 'user' ? 'user' : 'model',
+//         parts: [{ text: msg.content }]
+//       }));
+//     }
     
 //     // Start or continue chat
 //     const chat = model.startChat({

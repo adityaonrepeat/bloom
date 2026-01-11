@@ -1,41 +1,43 @@
 import { useEffect, useRef, useState } from "react"
 import { Send, Plus, MessageSquare, Trash2, Menu } from "lucide-react"
+import { useSelector } from "react-redux"
+import axios from "axios"
+
+const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export default function Chat() {
   const [message, setMessage] = useState("")
-  const [sessions, setSessions] = useState([
-    { id: 1, title: "New conversation", active: true }
-  ])
-  const [activeSession, setActiveSession] = useState(1)
-  const [chat, setChat] = useState([
-    {
-      role: "ai",
-      text: "Hi, I'm Aastha 🌸 I'm here to listen. What's on your mind?"
-    }
-  ])
+  const [sessions, setSessions] = useState([])
+  const [activeSession, setActiveSession] = useState(null)
+  const [chat, setChat] = useState([])
   const [isTyping, setIsTyping] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [conversationId, setConversationId] = useState(null)
+  const [chatHistory, setChatHistory] = useState([])
+  const user = useSelector((state) => state.nav.user)
 
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
 
-
-  // hide navbar
+  // Start initial conversation on mount
   useEffect(() => {
-    // Hide navbar when chat mounts
-    const navbar = document.querySelector('nav');
-    if (navbar) {
-      navbar.style.display = 'none';
+    if (user?.uid) {
+      startNewConversation()
     }
+  }, [user])
 
-    // Show navbar when chat unmounts
+  // Hide navbar
+  useEffect(() => {
+    const navbar = document.querySelector('nav')
+    if (navbar) {
+      navbar.style.display = 'none'
+    }
     return () => {
       if (navbar) {
-        navbar.style.display = 'flex';
+        navbar.style.display = 'flex'
       }
-    };
-  }, []);
-
+    }
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -48,21 +50,112 @@ export default function Chat() {
     textareaRef.current.style.height = newHeight + "px"
   }
 
-  const sendMessage = () => {
+  // Start a new conversation with backend
+  const startNewConversation = async () => {
+    if (!user?.uid) {
+      console.error('No user ID available')
+      return
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/aastha/chat`, {
+        uid: user.uid
+      })
+
+      const data = response.data
+      
+      if (data.conversationId && data.response) {
+        const newConvId = data.conversationId
+        const aiMessage = { role: "ai", text: data.response }
+        
+        setConversationId(newConvId)
+        setChat([aiMessage])
+        setChatHistory([
+          {
+            role: "user",
+            parts: [{
+              text: `Here is my emotional score: ${data.emotionalScore || 'N/A'}/50 and emotional level: ${data.emotionalLevel || 'N/A'}.\nPlease start the conversation as Aastha.`
+            }]
+          },
+          {
+            role: "model",
+            parts: [{ text: data.response }]
+          }
+        ])
+
+        const newSession = {
+          id: newConvId,
+          title: "New conversation",
+          active: true
+        }
+
+        setSessions(prev => [
+          newSession,
+          ...prev.map(s => ({ ...s, active: false }))
+        ])
+        setActiveSession(newConvId)
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error)
+      // Fallback
+      setChat([{
+        role: "ai",
+        text: "Hi, I'm Aastha 🌸 I'm here to listen. What's on your mind?"
+      }])
+    }
+  }
+
+  // Send message to backend
+  const sendMessage = async () => {
     if (!message.trim()) return
 
-    setChat((prev) => [...prev, { role: "user", text: message }])
+    const userMessage = { role: "user", text: message }
+    setChat(prev => [...prev, userMessage])
+    
+    const userMessageText = message
     setMessage("")
     textareaRef.current.style.height = "52px"
     setIsTyping(true)
 
-    setTimeout(() => {
+    try {
+      // Add user message to history
+      const updatedHistory = [
+        ...chatHistory,
+        {
+          role: "user",
+          parts: [{ text: userMessageText }]
+        }
+      ]
+
+      const response = await axios.post(`${API_URL}/aastha/chat`, {
+        uid: user.uid
+      })
+
+      const data = response.data
+      
       setIsTyping(false)
-      setChat((prev) => [
-        ...prev,
-        { role: "ai", text: "I hear you 💛 Tell me more about that." }
-      ])
-    }, 700)
+      
+      if (data.response) {
+        const aiMessage = { role: "ai", text: data.response }
+        setChat(prev => [...prev, aiMessage])
+        
+        // Update history with AI response
+        setChatHistory([
+          ...updatedHistory,
+          {
+            role: "model",
+            parts: [{ text: data.response }]
+          }
+        ])
+      }
+    } catch (error) {
+      console.error('Error sending message:', error)
+      setIsTyping(false)
+      setChat(prev => [...prev, {
+        role: "ai",
+        text: "I'm having trouble connecting. Please try again."
+      }])
+    }
   }
 
   const handleKeyDown = (e) => {
@@ -73,18 +166,7 @@ export default function Chat() {
   }
 
   const createNewSession = () => {
-    const newId = sessions.length + 1
-    setSessions([
-      { id: newId, title: "New conversation", active: true },
-      ...sessions.map(s => ({ ...s, active: false }))
-    ])
-    setActiveSession(newId)
-    setChat([
-      {
-        role: "ai",
-        text: "Hi, I'm Aastha 🌸 I'm here to listen. What's on your mind?"
-      }
-    ])
+    startNewConversation()
   }
 
   const deleteSession = (id, e) => {
@@ -202,7 +284,7 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* Input Area - ChatGPT Style */}
+        {/* Input Area */}
         <div className="border-t border-slate-200 bg-white">
           <div className="max-w-3xl mx-auto px-4 py-4">
             <div className="relative bg-white border-2 border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow focus-within:border-emerald-400">

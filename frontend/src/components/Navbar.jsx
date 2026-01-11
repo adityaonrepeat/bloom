@@ -7,7 +7,8 @@ import { handleLogout } from "../services/authService";
 const Navbar = () => {
   const dispatch = useDispatch();
   const router = useNavigate();
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.nav.user);
+  console.log("Navbar user:", user);
 
   return (
     <nav className="py-2 px-2 flex gap-4 items-center justify-between bg-gradient-to-bl from-emerald-100 via-white to-emerald-50 h-24">
@@ -19,18 +20,11 @@ const Navbar = () => {
       {/* Right Buttons */}
       <div className="flex gap-4 mr-5">
 
-        <button
-          className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
-        >
-          Logout
-        </button>
-
         {user ? (
           <button
             onClick={() => {
               handleLogout(user.uid).then(() => {
                 dispatch(setUser(null));
-                dispatch(toggleLoginScreen());
                 router("/");
               });
             }}
@@ -40,7 +34,9 @@ const Navbar = () => {
           </button>
         ) : (
           <button
-            onClick={() => dispatch(toggleLoginScreen())}
+            onClick={() => {
+              dispatch(toggleLoginScreen());
+            }}
             className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
           >
             Login

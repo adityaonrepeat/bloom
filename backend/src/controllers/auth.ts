@@ -12,14 +12,15 @@ export const logout = async (req: Request, res: Response) => {
 
         const userRef = db.collection("users").doc(uid);
 
-        await userRef.update({
-            status: "offline",
-            connectedWith: null,
-            connectionId: null
-        })
-
         try {
-            
+            const result = await userRef.update({
+                status: "offline",
+                connectedWith: null,
+                connectionId: null
+            });
+
+            console.log("User status updated to offline:", result);
+
             const onlineUsersCollection = db.collection("onlineUsers").doc(uid);
             await onlineUsersCollection.delete();
 

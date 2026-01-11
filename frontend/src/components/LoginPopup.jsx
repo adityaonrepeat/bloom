@@ -26,7 +26,7 @@ const LoginPopup = () => {
         if (success) {
             dispatch(setUser(myUser));
             dispatch(toggleLoginScreen());
-            router("/quiz");
+            router("/dashboard");
         }
 
         alert(message);

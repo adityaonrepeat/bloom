@@ -15,6 +15,7 @@ const navSlice = createSlice({
 
     setUser: (state, action) => {
       state.user = action.payload;
+      console.log("User set in navSlice:", state.user);
     },
   },
 });

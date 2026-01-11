@@ -11,9 +11,9 @@ export default function Result() {
   const user = useSelector((state) => state.nav.user);
 
 
-  console.log(score);
-  console.log(user.uid);
-  console.log(level);
+  // console.log(score);
+  // console.log(user.uid);
+  // console.log(level);
 
   useEffect(() => {
     const saveScore = async () => {

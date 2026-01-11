@@ -102,11 +102,12 @@ const Match = () => {
 
   /* ---------------- UI ---------------- */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100 p-4">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100 p-3">
+
+      <div className="max-w-7xl mx-auto flex-justify-center gap-4">
 
         {/* 🎥 CAMERA — DOUBLE SIZE */}
-        <div className="lg:col-span-2 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden relative h-[80vh] shadow-lg">
+        <div className="lg:col-span-2 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden relative h-[75vh] shadow-lg">
           {connectionId ? (
             <div ref={containerRef} className="w-full h-full" />
           ) : (
@@ -119,46 +120,25 @@ const Match = () => {
             </div>
           )}
         </div>
-
-        {/* 💬 SIDE PANEL */}
-        <div className="lg:col-span-1 flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden h-[80vh] shadow-md">
-
-          {/* HEADER */}
-          <div className="p-4 border-b bg-gray-50">
-            <h2 className="text-lg font-bold text-gray-800">
-              {connectionId ? "Connected" : "Welcome to Bloom"}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {connectionId
-                ? `Chatting with ${matchedUser?.displayName || "Stranger"}`
-                : "Click NEW to find someone"}
-            </p>
-          </div>
-
-          {/* BODY */}
-          <div className="flex-1 flex items-center justify-center text-gray-400 italic text-center px-4">
-            Chat feature coming soon...
-          </div>
-
-          {/* ACTIONS */}
-          <div className="p-4 border-t bg-gray-50 flex flex-col gap-3">
-            <button
-              onClick={() => navigate("/chat")}
-              className="w-full py-3 rounded-md bg-green-400 text-white hover:bg-green-500 transition"
-            >
-              Talk to Aastha
-            </button>
-
-            <button
-              onClick={cleanupRoom}
-              className="w-full py-3 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
-            >
-              NEW
-            </button>
-          </div>
-        </div>
-
+        
       </div>
+
+      <div className="max-w-7xl mx-auto py-4 flex gap-3">
+          <button
+            onClick={() => navigate("/chat")}
+            className="w-full py-3 rounded-md bg-green-400 text-white hover:bg-green-500 transition"
+          >
+            Talk to Aastha
+          </button>
+
+          <button
+            onClick={cleanupRoom}
+            className="w-full py-3 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+          >
+            NEW
+          </button>
+        </div>
+        
     </div>
   );
 };
