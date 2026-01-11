@@ -46,7 +46,7 @@ export const findMatch = async (req: Request, res: Response) => {
 
         const userEmotionalScore = userData.emotionalScore;
         if (userEmotionalScore) {
-            const availableUsers: Partial<User>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<User>) => user.id !== uid && !userConnectedEmails.includes(String(user.email)));
+            const availableUsers: Partial<User>[] = onlineUsersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((user: Partial<User>) => user.id !== uid);
             if (availableUsers.length === 0) {
                 return res.status(404).json({ success: false, message: "No available users for matching", data: null });
             }
