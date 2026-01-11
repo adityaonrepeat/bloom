@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "../config/firebase.config";
+import { User } from "../types/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -16,7 +17,7 @@ You are "Aastha," a compassionate therapeutic companion. Your role is to engage 
 **ASSESSMENT DATA INTEGRATION:**
 You will receive the user's:
 1. Total emotional score (10-50)
-2. The emotional level corresponding to the score
+2. The emotional level (RELAXED | BALANCED | STRESSED), coresponding to the emotional score.
 
 **RESPONSE GUIDELINES:**
 1. Start by acknowledging their assessment data naturally
@@ -70,42 +71,50 @@ export const startConversation = async (req: Request, res: Response) => {
     const { uid } = req.body;
 
     try {
-        const userEmotionalScore = db.collection("users").doc(uid);
-    
-    // Initialize model
-    const { model, generationConfig } = await initializeTherapeuticModel();
-    
-    // Create conversation history
-    const history = [
-      {
-        role: "user",
-        parts: [{
-          text: `Here is my emotional score: ${userEmotionalScore}/50.\nPlease start the conversation as Astha.`
-        }]
+      const userRef = db.collection('users').doc(uid);
+      const userSnap = await userRef.get();
+
+      if (!userSnap.exists) {
+        return res.status(404).json({ success: false, message: "User not found" });
       }
-    ];
+      // Initialize model
+      const { model, generationConfig } = await initializeTherapeuticModel();
+
+      const userData: Partial<User> = {
+        id: uid,
+        ...userSnap.data()
+      };
+
+      // Create conversation history
+      const history = [
+        {
+          role: "user",
+          parts: [{
+            text: `Here is my emotional score: ${userData.emotionalScore}/50 and emotional level: ${userData.emotionalLevel}.\nPlease start the conversation as Aastha.`
+          }]
+        }
+      ];
     
-    // Start chat session
-    const chat = model.startChat({
-      generationConfig,
-      history: history,
-    });
+      // Start chat session
+      const chat = model.startChat({
+        generationConfig,
+        history: history,
+      });
     
-    // Generate initial therapeutic response
-    const result = await chat.sendMessage("Begin the conversation as Aastha, using the assessment data to guide your opening.");
-    const response = result.response;
-    const text = response.text();
+      // Generate initial therapeutic response
+      const result = await chat.sendMessage("Begin the conversation as Aastha, using the assessment data to guide your opening.");
+      const response = result.response;
+      const text = response.text();
     
-    // Store conversation ID (in production, use database)
-    const conversationId = Date.now().toString();
+      // Store conversation ID (in production, use database)
+      const conversationId = Date.now().toString();
     
-    res.json({
-      conversationId,
-      response: text,
-      therapist: "Aastha",
-      timestamp: new Date().toISOString(),
-    });
-    
+      res.json({
+        conversationId,
+        response: text,
+        therapist: "Aastha",
+        timestamp: new Date().toISOString(),
+      });
   } catch (error: any) {
     console.error('Error in conversation start:', error);
     res.status(500).json({ 
@@ -115,3 +124,63 @@ export const startConversation = async (req: Request, res: Response) => {
   }
 }
 
+/**
+ * This controller is for session management
+ */
+// export const continueConversation = async (req: Request, res: Response) => {
+//   try {
+//     const { conversationId, message, history } = req.body;
+    
+//     if (!message || !conversationId) {
+//       return res.status(400).json({ 
+//         error: 'Missing message or conversationId' 
+//       });
+//     }
+    
+//     // In production, retrieve conversation history from database
+//     // For now, we'll use the provided history or initialize new
+    
+//     const { model, generationConfig } = await initializeTherapeuticModel();
+    
+//     // Convert history to Gemini format if provided
+//     // let chatHistory = [];
+//     // if (history && Array.isArray(history)) {
+//     //   chatHistory = history.map(msg => ({
+//     //     role: msg.role === 'user' ? 'user' : 'model',
+//     //     parts: [{ text: msg.content }]
+//     //   }));
+//     // }
+    
+//     // Start or continue chat
+//     const chat = model.startChat({
+//       generationConfig,
+//       history: chatHistory,
+//     });
+    
+//     // Send user message
+//     const result = await chat.sendMessage(message);
+//     const response = result.response;
+//     const text = response.text();
+    
+//     // Get updated history
+//     const updatedHistory = await chat.getHistory();
+    
+//     res.json({
+//       conversationId,
+//       response: text,
+//       therapist: "Elena",
+//       timestamp: new Date().toISOString(),
+//       history: updatedHistory.map(msg => ({
+//         role: msg.role,
+//         content: msg.parts[0].text
+//       })).slice(-10) // Last 10 messages
+//     });
+    
+//   } catch (error: any) {
+//     console.error('Error in conversation continue:', error);
+//     res.status(500).json({ 
+//       error: 'Failed to continue conversation',
+//       details: error.message 
+//     });
+//   }
+// };
