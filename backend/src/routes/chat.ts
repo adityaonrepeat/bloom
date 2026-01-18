@@ -3,6 +3,9 @@ import { startConversation } from "../controllers/chat";
 
 const router = Router();
 
-router.post("/chat", startConversation);
+router.get("/chat", getOldConversation);
+router.post("/chat/message", chatController);
+router.post("/chat/new", createNewSession);
+router.get("/chat/:userId", getOldSessions);
 
 export default router;
