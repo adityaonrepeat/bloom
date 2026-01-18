@@ -22,10 +22,12 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.37.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "firebase-admin": "^13.6.0"
+    "firebase-admin": "^13.6.0",
+    "remove-markdown": "^0.6.3",
+    "zod": "^4.3.5"
   }
 }

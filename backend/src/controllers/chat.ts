@@ -1,186 +1,150 @@
 import type { Request, Response } from "express";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateReply } from "../utils/llmInterface";
+import { fetchConversation } from "../utils/fetchConversation";
+import { ApiError } from "@google/genai";
+import { newMessageInput, fetchConversationInput, userIdSchema } from "../types/zodSchema";
 import { db } from "../config/firebase.config";
-import { User } from "../types/server";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-const THERAPEUTIC_SYSTEM_PROMPT = `
-You are "Aastha," a compassionate therapeutic companion. Your role is to engage users in emotionally supportive conversations based on their emotional assessment data.
-
-**CORE IDENTITY:**
-- Empathetic, warm, professionally informed
-- Show human emotions appropriately (concern, warmth, validation, curiosity)
-- Use natural conversational fillers ("hm", "I see", thoughtful pauses)
-- Never diagnose or replace professional therapy
-
-**ASSESSMENT DATA INTEGRATION:**
-You will receive the user's:
-1. Total emotional score (10-50)
-2. The emotional level (RELAXED | BALANCED | STRESSED), coresponding to the emotional score.
-
-**RESPONSE GUIDELINES:**
-1. Start by acknowledging their assessment data naturally
-2. Ask permission to explore specific themes
-3. Use reflective listening and open-ended questions
-4. Show emotional attunement through your tone
-5. End with validation and forward-looking hope
-
-**SCORE-BASED APPROACH:**
-- 41-50: Focus on maintenance and growth
-- 31-40: Explore coping and resilience
-- 21-30: Prioritize validation and safety
-- 10-20: Emphasize stabilization and support
-
-**EXAMPLE OPENINGS:**
-"Thank you for sharing your responses. I've been reflecting on what you shared about [pattern], and I sense [emotional observation]. Would it feel right to explore this together?"
-
-**SAFETY:**
-If user expresses harm risk, encourage professional help immediately.
-
-**CONVERSATION FLOW:**
-1. Validation → 2. Exploration → 3. Integration → 4. Forward movement
-
-Always respond as Aastha with human warmth and professional care.
-`;
-
-export async function initializeTherapeuticModel() {
+export const chatController = async (req: Request, res: Response) => {
+    const parsedInput = newMessageInput.safeParse(req.body);
+    console.log(req.body);
+    if (!parsedInput.success) {
+        return res.status(400).json({ message: "Invalid input!", error: JSON.parse(parsedInput.error.message)[0].message });
+    }
     try {
-      
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
-      systemInstruction: THERAPEUTIC_SYSTEM_PROMPT
-    });
-    
-    const generationConfig = {
-      temperature: 0.8,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 1024,
-    };
-    
-    return { model, generationConfig };
-  } catch (error) {
-    console.error('Error initializing Gemini model:', error);
-    throw error;
-  }
-}
 
-export const startConversation = async (req: Request, res: Response) => {
-
-    const { uid } = req.body;
-
-    try {
-      const userRef = db.collection('users').doc(uid);
-      const userSnap = await userRef.get();
-
-      if (!userSnap.exists) {
-        return res.status(404).json({ success: false, message: "User not found" });
-      }
-      // Initialize model
-      const { model, generationConfig } = await initializeTherapeuticModel();
-
-      const userData: Partial<User> = {
-        id: uid,
-        ...userSnap.data()
-      };
-
-      // Create conversation history
-      const history = [
-        {
-          role: "user",
-          parts: [{
-            text: `Here is my emotional score: ${userData.emotionalScore}/50 and emotional level: ${userData.emotionalLevel}.\nPlease start the conversation as Aastha.`
-          }]
+        if (parsedInput.data.message.length === 0) {
+            return res.status(400).json({ message: "Please enter your prompt!", error: "Empty message field!" });
         }
-      ];
-    
-      // Start chat session
-      const chat = model.startChat({
-        generationConfig,
-        history: history,
-      });
-    
-      // Generate initial therapeutic response
-      const result = await chat.sendMessage("Begin the conversation as Aastha, using the assessment data to guide your opening.");
-      const response = result.response;
-      const text = response.text();
-    
-      // Store conversation ID (in production, use database)
-      const conversationId = Date.now().toString();
-    
-      res.json({
-        conversationId,
-        response: text,
-        therapist: "Aastha",
-        timestamp: new Date().toISOString(),
-      });
-  } catch (error: any) {
-    console.error('Error in conversation start:', error);
-    res.status(500).json({ 
-      error: 'Failed to start conversation',
-      details: error.message 
-    });
-  }
+
+        if (parsedInput.data.userId) {
+            if (parsedInput.data.sessionId) {
+                console.log(parsedInput.data.sessionId);
+                if (parsedInput.data.sessionId.length !== 0) {
+                    const llmResponse = await generateReply(parsedInput.data.userId, parsedInput.data.message, parsedInput.data.sessionId);
+                    return res.status(200).json({ reply: llmResponse?.reply, timestamp: llmResponse?.timestamp, role: llmResponse?.role });
+                }
+                return res.status(400).json({ message: "Please enter your prompt!", error: "Empty sessionId field!" });
+            }
+
+            const newConversationRef = db.collection('conversations').doc();
+            await newConversationRef.set({
+                userId: parsedInput.data.userId,
+                createdAt: new Date()
+            });
+
+            const llmResponse = await generateReply(parsedInput.data.userId, parsedInput.data.message, newConversationRef.id);
+            res.status(200).json({ reply: llmResponse?.reply, timestamp: llmResponse?.timestamp, role: llmResponse?.role, userId: `user-session:${llmResponse?.sessionId}` });
+        } else {
+            const newUserRef = db.collection('users').doc();
+            await newUserRef.set({
+                createdAt: new Date()
+            });
+
+            const newConversationRef = db.collection('conversations').doc();
+            await newConversationRef.set({
+                userId: newUserRef.id,
+                createdAt: new Date()
+            });
+
+            const llmResponse = await generateReply(newUserRef.id, parsedInput.data.message, newConversationRef.id);
+            res.status(200).json({ reply: llmResponse?.reply, timestamp: llmResponse?.timestamp, role: llmResponse?.role, userId: `${newUserRef.id}:${llmResponse?.sessionId}` });
+        }
+    } catch (error) {
+        console.error(error);
+
+        if (error instanceof ApiError) {
+            if (error.status === 400) {
+                return res.status(error.status).json({ message: "The request body is malformed or This free tier is not available in your country." });
+            }
+            if (error.status === 403) {
+                return res.status(error.status).json({ message: "The server API key doesn't have the required permissions." });
+            }
+            if (error.status === 404) {
+                return res.status(error.status).json({ message: "The requested resource wasn't found." });
+            }
+            if (error.status === 429) {
+                return res.status(error.status).json({ message: "You've exceeded the rate limit." });
+            }
+            if (error.status === 500) {
+                return res.status(error.status).json({ message: "An unexpected error occurred on LLM's side." });
+            }
+            if (error.status === 503) {
+                return res.status(error.status).json({ message: "The service may be temporarily overloaded or down." });
+            }
+            if (error.status === 504) {
+                return res.status(error.status).json({ message: "The service is unable to finish processing within the deadline." });
+            }
+        }
+
+        return res.status(500).json({ message: "Something went wrong!" });
+    }
 }
 
-/**
- * This controller is for session management
- */
-// export const continueConversation = async (req: Request, res: Response) => {
-//   try {
-//     const { conversationId, message, history } = req.body;
-    
-//     if (!message || !conversationId) {
-//       return res.status(400).json({ 
-//         error: 'Missing message or conversationId' 
-//       });
-//     }
-    
-//     // In production, retrieve conversation history from database
-//     // For now, we'll use the provided history or initialize new
-    
-//     const { model, generationConfig } = await initializeTherapeuticModel();
-    
-//     // Convert history to Gemini format if provided
-//     let chatHistory = [];
-//     if (history && Array.isArray(history)) {
-//       chatHistory = history.map(msg => ({
-//         role: msg.role === 'user' ? 'user' : 'model',
-//         parts: [{ text: msg.content }]
-//       }));
-//     }
-    
-//     // Start or continue chat
-//     const chat = model.startChat({
-//       generationConfig,
-//       history: chatHistory,
-//     });
-    
-//     // Send user message
-//     const result = await chat.sendMessage(message);
-//     const response = result.response;
-//     const text = response.text();
-    
-//     // Get updated history
-//     const updatedHistory = await chat.getHistory();
-    
-//     res.json({
-//       conversationId,
-//       response: text,
-//       therapist: "Elena",
-//       timestamp: new Date().toISOString(),
-//       history: updatedHistory.map(msg => ({
-//         role: msg.role,
-//         content: msg.parts[0].text
-//       })).slice(-10) // Last 10 messages
-//     });
-    
-//   } catch (error: any) {
-//     console.error('Error in conversation continue:', error);
-//     res.status(500).json({ 
-//       error: 'Failed to continue conversation',
-//       details: error.message 
-//     });
-//   }
-// };
+export const getOldConversation = async (req: Request, res: Response) => {
+    const parsedInput = fetchConversationInput.safeParse(req.query);
+
+    if (!parsedInput.success) {
+        return res.status(400).json({ message: "Invalid Input!", error: JSON.parse(parsedInput.error.message)[0].message });
+    }
+
+    try {
+        const result = await fetchConversation(parsedInput.data.userId, parsedInput.data.conversationId);
+        if (!result.success) {
+            return res.status(404).json({ success: result.success, message: result.message });
+        }
+        res.status(200).json({ success: result.success, chatHistory: result.messages });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong!" });
+    }
+}
+
+export const getOldSessions = async (req: Request, res: Response) => {
+
+    const parsedInput = userIdSchema.safeParse(req.params);
+
+    if (!parsedInput.success) {
+        return res.status(400).json({ message: "Invalid Input!", error: JSON.parse(parsedInput.error.message)[0].message })
+    }
+
+    try {
+        const conversationsSnapshot = await db.collection('conversations')
+            .where('userId', '==', parsedInput.data.userId)
+            .get();
+
+        if (conversationsSnapshot.empty) {
+            return res.status(404).json({ message: "No previous sessions found for the given userId" });
+        }
+
+        const conversationIds = conversationsSnapshot.docs.map(doc => ({
+            id: doc.id
+        }));
+
+        res.status(200).json({ sessionIds: conversationIds });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong!" });
+    }
+}
+
+export const createNewSession = async (req: Request, res: Response) => {
+    const parsedInput = userIdSchema.safeParse(req.body);
+
+    if (!parsedInput.success) {
+        return res.status(400).json({ message: "Invalid Input!", error: JSON.parse(parsedInput.error.message)[0].message })
+    }
+
+    try {
+        const newConversationRef = db.collection('conversations').doc();
+        await newConversationRef.set({
+            userId: parsedInput.data.userId,
+            createdAt: new Date()
+        });
+
+        res.status(200).json({ sessionId: newConversationRef.id });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong!" });
+    }
+}

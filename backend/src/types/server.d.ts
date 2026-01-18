@@ -17,3 +17,23 @@ export interface User {
     emotionalScore: number,
     emotionalLevel: "Calm" | "Balanced" | "Stressed"
 }
+
+export interface Conversation {
+    id: string;
+    userId: string
+    messages: Message[] 
+    createdAt: Date
+}
+
+export enum Role {
+  user,
+  model
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  parts: Part[];
+  role: Role;
+  timeStamp: Date;
+}
