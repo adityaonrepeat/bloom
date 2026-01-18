@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { startConversation } from "../controllers/chat"; 
+import { chatController, getOldConversation, getOldSessions, createNewSession } from "../controllers/chat";
 
 const router = Router();
 
