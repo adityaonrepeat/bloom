@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../config/firebase.config";
+import { User } from "../types/server";
 
 export const logout = async (req: Request, res: Response) => {
     try {
@@ -13,6 +14,21 @@ export const logout = async (req: Request, res: Response) => {
         const userRef = db.collection("users").doc(uid);
 
         try {
+            const userSnap = await userRef.get();
+
+            if (!userSnap.exists) {
+                return res.status(404).json({ success: false, message: "User not found" });
+            }
+
+            const userData: Partial<User> = {
+                id: uid,
+                ...userSnap.data()
+            }
+
+            if (userData.connectionId) {
+                await db.collection("connections").doc(userData.connectionId).delete();
+            }
+
             const result = await userRef.update({
                 status: "offline",
                 connectedWith: null,

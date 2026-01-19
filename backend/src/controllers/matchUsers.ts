@@ -94,7 +94,7 @@ export const findMatch = async (req: Request, res: Response) => {
                     success: true,
                     message: "Match found",
                     data: {
-                        matcheduser: randomUser,
+                        matchedUser: randomUser,
                         connectionId
                     }
                 })
@@ -128,7 +128,7 @@ export const findMatch = async (req: Request, res: Response) => {
                     success: true,
                     message: "Match found",
                     data: {
-                        matcheduser: randomUser,
+                        matchedUser: randomUser,
                         connectionId
                     }
                 })
