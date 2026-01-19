@@ -9,6 +9,7 @@ import Quiz from "./page/quiz";
 import Result from "./page/Result";
 import Navbar from "./components/Navbar";
 import Dashboard from "./page/Dashboard";
+import About from "./page/About";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
       <LoginEnable />
       <Routes> 
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/match" element={<Match />} />
         <Route path="/quiz" element={<Quiz />} />

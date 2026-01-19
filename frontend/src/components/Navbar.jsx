@@ -14,7 +14,7 @@ const Navbar = () => {
     <nav className="py-2 px-2 flex gap-4 items-center justify-between bg-gradient-to-bl from-emerald-100 via-white to-emerald-50 h-24">
       {/* Left Logo */}
       <Link to="/" className="flex gap-4 items-center ml-5">
-        <h1 className="text-3xl font-bold text-green-600">Bloom 🌱</h1>
+        <h1 className="text-3xl font-bold text-green-600">🌱 Bloom</h1>
       </Link>
 
       {/* Right Buttons */}
