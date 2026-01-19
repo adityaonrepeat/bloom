@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useNavigate } from "react-router-dom";
 import { Send, Plus, MessageSquare, Trash2, Menu } from "lucide-react"
 import { useSelector } from "react-redux"
 import axios from "axios"
@@ -18,6 +19,8 @@ export default function Chat() {
 
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
+
+  const navigate = useNavigate();
 
   // Start initial conversation on mount
   useEffect(() => {
@@ -53,7 +56,6 @@ export default function Chat() {
   // Start a new conversation with backend
   const startNewConversation = async () => {
     if (!user?.uid) {
-      console.error('No user ID available')
       return
     }
 
@@ -96,7 +98,7 @@ export default function Chat() {
         setActiveSession(newConvId)
       }
     } catch (error) {
-      console.error('Error starting conversation:', error)
+      console.error('Error starting conversation:', error);
       // Fallback
       setChat([{
         role: "ai",
@@ -218,12 +220,12 @@ export default function Chat() {
           ))}
         </div>
 
-        <div className="p-4 border-t border-slate-700">
-          <div className="flex items-center gap-3 px-3 py-2 text-slate-400 text-sm">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
-              A
+        <div className="py-9 px-2 border-t border-slate-700">
+          <div className="flex items-center gap-3 px-3 py-2 text-slate-400 text-sm" onClick={() => navigate("/dashboard")}>
+            <div className="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-sm hover:cursor-pointer">
+              B
             </div>
-            <span>Aastha 🌱</span>
+            <button className="text-xl font-bold text-slate-500 hover:cursor-pointer" type="button">Bloom 🌱</button>
           </div>
         </div>
       </div>

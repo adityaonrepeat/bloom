@@ -33,11 +33,12 @@ const LoginPopup = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 grid place-items-center z-50">
+    <div className="fixed inset-0 bg-black/70 grid place-items-center z-50" onClick={() => dispatch(toggleLoginScreen())}>
       
       {/* FORM START */}
       <form
         onSubmit={handleSignin}
+        onClick={(e) => e.stopPropagation()}
         className="lg:w-[28vw] bg-white rounded-lg grid place-items-center py-10 px-8"
       >
         

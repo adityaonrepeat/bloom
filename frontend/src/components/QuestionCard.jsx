@@ -2,7 +2,7 @@ import Button from "./ui/Button";
 
 export default function QuestionCard({ question, onAnswer }) {
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 ">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <h2 className="text-xl font-semibold text-center">
         {question.text}
       </h2>
