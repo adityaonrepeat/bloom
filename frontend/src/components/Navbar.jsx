@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setUser, toggleLoginScreen } from "../redux/slices/navSlice";
 import { handleLogout } from "../services/authService";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -18,8 +19,8 @@ const Navbar = () => {
       </Link>
 
       {/* Right Buttons */}
-      <div className="flex gap-4 mr-5">
-
+      <div className="flex items-center justify-center gap-4 mr-5">
+        <LanguageSwitcher/>
         {user ? (
           <button
             onClick={() => {
