@@ -10,7 +10,7 @@ Bloom has been completely redesigned and rebuilt as **Bloom V2**, with a modern 
 https://github.com/adityaonrepeat/bloom-v2
 
 ### 🎥 Bloom V2 Demo
-<PASTE_YOUR_YOUTUBE_OR_VIDEO_LINK_HERE>
+<https://youtu.be/Sx28daYpL64>
 
 ---
 
