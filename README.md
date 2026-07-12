@@ -16,7 +16,7 @@ https://github.com/adityaonrepeat/bloom-v2
 
 ## What's New in Bloom V2?
 
-- ⚡ Built with **Next.js 15 + TypeScript**
+- ⚡ Built with **Next.js 16 + TypeScript**
 - 🔐 Better authentication and session management
 - 🤝 Anonymous real-time peer support
 - 📹 Video & voice conversations
