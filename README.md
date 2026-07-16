@@ -1,4 +1,4 @@
-# 🌸 Bloom (Archived - Version 1)
+# 🌸 Bloom (Version 1)
 
 > **This repository contains the first version of Bloom and is no longer actively maintained.**
 
